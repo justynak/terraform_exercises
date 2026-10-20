@@ -22,3 +22,5 @@ override.tf.json
 # CLI config that may contain credentials
 .terraformrc
 terraform.rc
+
+.terraform.lock.hcl
