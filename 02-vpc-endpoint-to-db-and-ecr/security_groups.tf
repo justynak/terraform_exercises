@@ -9,14 +9,6 @@ resource "aws_security_group" "application_server_sg" {
   # no ingress for now, as ec2 is not reachable from outside (no alb just yet)
 
   egress {
-    description = "Intra-VPC (VPC endpoints)"
-    from_port   = 0
-    to_port     = 0
-    protocol    = "-1"
-    cidr_blocks = [local.vpc_cidr]
-  }
-
-  egress {
     description = "Interface endpoints (ECR, Logs, SSM)"
     from_port   = 443
     to_port     = 443
@@ -35,9 +27,9 @@ resource "aws_security_group" "application_server_sg" {
   tags = { Name = "app-server-sg" }
 }
 
-resource "aws_security_group" "ecr_endpoint_sg" {
-  name        = "ecr-endpoint-sg"
-  description = "Elastic Container Registry Endpoint Security Group"
+resource "aws_security_group" "vpc_endpoint_sg" {
+  name        = "vpc-endpoint-sg"
+  description = "VPC interface endpoints (ECR, Logs, SSM) security group"
   vpc_id      = aws_vpc.main_vpc.id
 
   ingress {
@@ -56,5 +48,5 @@ resource "aws_security_group" "ecr_endpoint_sg" {
     cidr_blocks = [local.vpc_cidr]
   }
 
-  tags = { Name = "ecr-endpoint-sg" }
+  tags = { Name = "vpc-endpoint-sg" }
 }

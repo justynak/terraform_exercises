@@ -10,16 +10,16 @@ resource "aws_vpc" "main_vpc" {
 
 resource "aws_subnet" "public_subnet_a" {
   vpc_id                  = aws_vpc.main_vpc.id
-  cidr_block              = local.public_subnet_cidrs.a
-  availability_zone       = local.availability_zone_a
+  cidr_block              = local.public_subnet_cidr
+  availability_zone       = local.availability_zone
   map_public_ip_on_launch = true
   tags                    = { Name = "public-subnet-a" }
 }
 
 resource "aws_subnet" "private_subnet_a" {
   vpc_id            = aws_vpc.main_vpc.id
-  cidr_block        = local.private_subnet_cidrs.a
-  availability_zone = local.availability_zone_a
+  cidr_block        = local.private_subnet_cidr
+  availability_zone = local.availability_zone
   tags              = { Name = "private-subnet-a" }
 }
 
@@ -46,7 +46,7 @@ resource "aws_vpc_endpoint" "ecr" {
   vpc_id              = aws_vpc.main_vpc.id
   service_name        = "com.amazonaws.${data.aws_region.current.name}.${each.key}"
   vpc_endpoint_type   = "Interface"
-  security_group_ids  = [aws_security_group.ecr_endpoint_sg.id]
+  security_group_ids  = [aws_security_group.vpc_endpoint_sg.id]
   subnet_ids          = [aws_subnet.private_subnet_a.id]
   private_dns_enabled = true
 }
@@ -59,12 +59,12 @@ resource "aws_vpc_endpoint" "s3" {
 }
 
 # CloudWatch Logs interface endpoint so the EC2 can push container logs
-# without any internet egress. Reuses the ECR endpoint SG (443 from app-server).
+# without any internet egress. Reuses the shared VPC endpoint SG (443 from app-server).
 resource "aws_vpc_endpoint" "logs" {
   vpc_id              = aws_vpc.main_vpc.id
   service_name        = "com.amazonaws.${data.aws_region.current.name}.logs"
   vpc_endpoint_type   = "Interface"
-  security_group_ids  = [aws_security_group.ecr_endpoint_sg.id]
+  security_group_ids  = [aws_security_group.vpc_endpoint_sg.id]
   subnet_ids          = [aws_subnet.private_subnet_a.id]
   private_dns_enabled = true
 
@@ -79,10 +79,9 @@ resource "aws_vpc_endpoint" "ssm" {
   vpc_id              = aws_vpc.main_vpc.id
   service_name        = "com.amazonaws.${data.aws_region.current.name}.${each.key}"
   vpc_endpoint_type   = "Interface"
-  security_group_ids  = [aws_security_group.ecr_endpoint_sg.id]
+  security_group_ids  = [aws_security_group.vpc_endpoint_sg.id]
   subnet_ids          = [aws_subnet.private_subnet_a.id]
   private_dns_enabled = true
 
   tags = { Name = "${each.key}-endpoint" }
 }
-
