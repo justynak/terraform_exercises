@@ -90,7 +90,7 @@ Rendered with `templatefile()` from `compute.tf`. It:
 ## Usage
 
 ```bash
-cd 02-vpc-endpoint-to-db-and-ecr
+cd 02-ec2-pulling-docker-cloudwatch-logs
 
 terraform init
 terraform plan
@@ -141,5 +141,5 @@ aws logs tail "$(terraform output -raw log_group_name)" --follow
 
 ## Notes & limitations
 
-- Single AZ, single subnet, no DB — despite the folder name `...-to-db-and-ecr`.
-- No load balancer / public ingress yet; the app server SG has egress only.
+- Single AZ, single subnet
+- The app server SG has egress only
